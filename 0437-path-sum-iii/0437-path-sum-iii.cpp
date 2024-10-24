@@ -1,65 +1,46 @@
-/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
- *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
- *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
- * };
- */
 class Solution {
 public:
     int answer = 0;
-    //vector<int> sumNum;
     int target = -1;
-    long long sumP(vector<long long>& vec){
-        long long sums =0;
-        for(long long i : vec){
-            //std::cout<<i<< " ";
-            sums += i;
-        }
-        //std::cout << std::endl;
-        return sums;
-    }
-    void dfs(TreeNode* root, bool start, vector<long long>& sumNum){
-        if(!sumNum.empty()){
-            if(sumP(sumNum) == target){
-                // for(int i :sumNum){
-                //     std::cout << i << " ";
-                // }
-                // std::cout << std::endl;
-                answer +=1;
-            }
-        }
-        if(root == nullptr){
+    
+    // Calculate sum of the current path and return the total number of valid paths
+    void dfs(TreeNode* root, long long currentSum, vector<long long>& sumNum) {
+        if (root == nullptr) {
             return;
         }
-        if(start){
-            sumNum.push_back(root->val);
-            dfs(root->left,true,sumNum);
-            dfs(root->right,true,sumNum);
-            sumNum.pop_back();
-        }
-        else{
-            dfs(root->left,false,sumNum);
-            dfs(root->left,true,sumNum);
-            dfs(root->right,false,sumNum);
-            dfs(root->right,true,sumNum);
-        }
-        return;
-    }
-    int pathSum(TreeNode* root, int targetSum){
-        if(root == nullptr){
-            return 0;
-        }
-        target = targetSum;
-        vector<long long> sumNum;
-        dfs(root, false, sumNum);
-        dfs(root, true, sumNum);
+
+        // Add current node value to the path sum
+        currentSum += root->val;
+        sumNum.push_back(root->val);
         
-        std::cout << answer << std::endl;
-        return answer/2;
+        // Check if the current path sum equals the target
+        if (currentSum == target) {
+            answer++;
+        }
+        
+        // Continue DFS for left and right children
+        dfs(root->left, currentSum, sumNum);
+        dfs(root->right, currentSum, sumNum);
+        
+        // Backtrack by removing the last element from the path
+        sumNum.pop_back();
+    }
+
+    // Start DFS from each node
+    void startFromNode(TreeNode* node) {
+        if (node == nullptr) return;
+        
+        vector<long long> sumNum;  // Store the current path
+        dfs(node, 0, sumNum);  // Perform DFS starting from the current node
+        
+        // After processing the current node, recursively start DFS from its children
+        startFromNode(node->left);
+        startFromNode(node->right);
+    }
+
+    int pathSum(TreeNode* root, int targetSum) {
+        target = targetSum;
+        startFromNode(root);  // Start DFS from every node
+        return answer;
     }
 };
